@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Game</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #43cea2, #185a9d);
+  background-size: 400% 400%;
+  animation: gradientBG 10s ease infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  max-width: 450px;
+  width: 100%;
+  padding: 35px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  animation: slideUp 0.8s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.logo {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.card h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #333;
+}
+
+.subtitle {
+  color: #666;
+  margin: 10px 0 25px;
+  font-size: 15px;
+}
+
+.features {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 25px;
+}
+
+.feature {
+  font-size: 14px;
+  color: #444;
+}
+
+.feature span {
+  display: block;
+  font-size: 22px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus {
+  border-color: #2575fc;
+  box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.25);
+}
+
+button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px;
+  font-size: 17px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2575fc, #6a11cb);
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.footer {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #777;
+}
+
+.floating {
+  position: absolute;
+  font-size: 40px;
+  opacity: 0.25;
+  animation: float 6s ease-in-out infinite;
+}
+
+.floating:nth-child(1) {
+  top: 15%;
+  left: 10%;
+}
+
+.floating:nth-child(2) {
+  top: 70%;
+  left: 80%;
+  animation-delay: 2s;
+}
+
+.floating:nth-child(3) {
+  top: 40%;
+  left: 85%;
+  animation-delay: 4s;
+}
+
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-25px); }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 25px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="floating">❓</div>
+<div class="floating">🎯</div>
+<div class="floating">🏆</div>
+
+<div class="card">
+  <div class="logo">🎯</div>
+  <h1>Ultimate Quiz Challenge</h1>
+  <p class="subtitle">Test your knowledge & climb the leaderboard</p>
+
+  <div class="features">
+    <div class="feature"><span>🏆</span>Live Ranking</div>
+    <div class="feature"><span>⏱</span>Fast Play</div>
+  </div>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/">
+    <input
+  type="text"
+  name="name"
+  placeholder="Enter your name"
+  required
+  minlength="3"
+  maxlength="20"
+  pattern="[A-Za-z ]+"
+  title="Only letters and spaces allowed (3–20 characters)"
+  oninput="this.value = this.value.replace(/[^A-Za-z ]/g, '')"
+/>
+
+    <button type="submit">🚀 Start Quiz</button>
+  </form>
+
+  <div class="footer">
+    Compete • Learn • Win
+  </div>
+</div>
+
+      <script>
+  const nameInput = document.querySelector('input[name="name"]');
+
+  nameInput.addEventListener("blur", () => {
+    nameInput.value = nameInput.value.trim().replace(/\s+/g, " ");
+  });
+</script>
+
+
+</body>
+</html>

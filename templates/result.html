@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Result</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #43cea2, #185a9d);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      max-width: 450px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .amount {
+      font-size: 26px;
+      font-weight: bold;
+      color: #2ecc71;
+      margin: 15px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .leaderboard {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .play {
+      background: #eee;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>{{ message }}</h1>
+    <p>Player: <strong>{{ name }}</strong></p>
+    <div class="amount">₹ {{ amount }}</div>
+
+    <a href="/leaderboard">
+      <button class="leaderboard">🏆 View Leaderboard</button>
+    </a>
+
+    <a href="{{ url_for('review',     idx=results_count - 1) }}">
+      <button class="leaderboard">📋    Review My Answers</button>
+    </a>
+
+
+    <a href="/">
+      <button class="play">🔁 Play Again</button>
+    </a>
+  </div>
+
+</body>
+
+</html>

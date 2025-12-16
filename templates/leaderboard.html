@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #43cea2, #185a9d);
+      font-family: "Poppins", sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 18px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: center;
+    }
+
+    th {
+      background: #667eea;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background: #f4f6ff;
+    }
+
+    .highlight {
+      background: #d4edda !important;
+      font-weight: bold;
+    }
+
+    .back {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #667eea;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🏆 Leaderboard</h1>
+
+  <table>
+    <tr>
+      <th>Rank</th>
+      <th>Name</th>
+      <th>Score</th>
+      <th>Action</th>
+    </tr>
+
+    {% for r in results %}
+    <tr class="{% if r.name == user %}highlight{% endif %}">
+      <td>{{ loop.index }}</td>
+      <td>{{ r.name }}</td>
+      <td>₹ {{ r.amount }}</td>
+      <td>
+        {% if r.name == user and last_attempt_idx is not none %}
+          <a href="{{ url_for('review', idx=last_attempt_idx) }}">
+            <button>📋 Review My Answers</button>
+          </a>
+        {% else %}
+          —
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <div class="back">
+    <a href="/">
+      <button>⬅ Play Again</button>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

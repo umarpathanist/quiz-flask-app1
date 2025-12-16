@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Review</title>
+
+<style>
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+.card {
+  background: white;
+  max-width: 800px;
+  width: 100%;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+h1 {
+  text-align: center;
+}
+
+.question {
+  margin-bottom: 20px;
+}
+
+.correct {
+  color: green;
+  font-weight: 600;
+}
+
+.wrong {
+  color: red;
+  font-weight: 600;
+}
+
+hr {
+  margin: 15px 0;
+}
+
+.back {
+  text-align: center;
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>📋 Quiz Review</h1>
+
+  <p><strong>Name:</strong> {{ attempt.name }}</p>
+  <p><strong>Score:</strong> ₹{{ attempt.amount }}</p>
+  <p><strong>Correct:</strong> {{ attempt.correct }} |
+     <strong>Wrong:</strong> {{ attempt.wrong }}</p>
+
+  <hr>
+
+  {% if attempt.answers %}
+    {% for a in attempt.answers %}
+      <div class="question">
+        <strong>Q{{ loop.index }}. {{ a.question }}</strong><br>
+
+        Your Answer:
+        <span class="{{ 'correct' if a.is_correct else 'wrong' }}">
+          {{ a.user_answer }} {{ '✅' if a.is_correct else '❌' }}
+        </span><br>
+
+        {% if not a.is_correct %}
+          Correct Answer:
+          <span class="correct">{{ a.correct_answer }}</span>
+        {% endif %}
+      </div>
+      <hr>
+    {% endfor %}
+  {% else %}
+    <p>No detailed review available for this attempt.</p>
+  {% endif %}
+
+  <div class="back">
+    <a href="{{ url_for('leaderboard') }}">
+      <button>⬅ Back to Leaderboard</button>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>
