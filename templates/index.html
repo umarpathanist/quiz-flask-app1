@@ -125,7 +125,7 @@ button:hover:not(:disabled) {
 <div class="card">
 
   <div class="header-row">
-    <div class="logo">🎯 </div>
+    <div class="logo">🎯</div>
 
     <div class="weather" id="weatherBox">
       ⛅ Loading...
@@ -134,7 +134,7 @@ button:hover:not(:disabled) {
 
   <h1>Ultimate Quiz Challenge</h1>
   <p class="subtitle">Test your knowledge & climb the leaderboard</p>
-
+  
   {% if error %}
     <div class="error" id="serverError">{{ error }}</div>
   {% endif %}
@@ -193,25 +193,55 @@ document.querySelector("form").addEventListener("submit", (e) => {
   if (button.disabled) e.preventDefault();
 });
 
-// -------- WEATHER --------
+
+// -------- WEATHER WITH CITY NAME (STABLE) --------
 if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(success => {
+  navigator.geolocation.getCurrentPosition(async success => {
+
     const lat = success.coords.latitude;
     const lon = success.coords.longitude;
 
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
-      .then(res => res.json())
-      .then(data => {
-        const temp = data.current_weather.temperature;
-        weatherBox.innerHTML = `🌤️ ${temp}°C`;
-      })
-      .catch(() => weatherBox.innerHTML = "🌤️ Weather Unavailable");
+    try {
+      // 1️⃣ Weather API
+      const weatherRes = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+      );
+      const weatherData = await weatherRes.json();
+      const temp = weatherData.current_weather.temperature;
+
+      // 2️⃣ City API (Nominatim - very stable)
+      const cityRes = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
+      );
+      const cityData = await cityRes.json();
+
+     const addr = cityData.address;
+
+      const city =
+        addr?.city ||
+        addr?.district ||
+        addr?.suburb ||
+        addr?.town ||
+        addr?.village ||
+        addr?.county ||
+        addr?.state ||
+        "Your Area";
+
+
+      weatherBox.innerHTML = `🌤️ ${city} — ${temp}°C`;
+
+    } catch (e) {
+      console.log(e);
+      weatherBox.innerHTML = "🌤️ Weather Unavailable";
+    }
+
   }, () => {
     weatherBox.innerHTML = "🌤️ Location Blocked";
   });
 } else {
   weatherBox.innerHTML = "🌤️ Not Supported";
 }
+
 </script>
 
 </body>
