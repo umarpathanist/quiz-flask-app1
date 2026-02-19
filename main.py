@@ -35,18 +35,27 @@ def get_conn():
             port=DB_CONFIG["port"]
         )
     except Exception as e:
-        print("DB CONNECTION ERROR:", e)
+        print("❌ DB CONNECTION ERROR:", e)
         raise
 
 
 # =========================
-# LOAD QUESTIONS
+# LOAD QUESTIONS (SAFE)
 # =========================
-QUESTIONS_FILE = os.path.join(app.root_path, "questions.json")
-
 def load_questions():
-    with open(QUESTIONS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    file_path = os.path.join(app.root_path, "questions.json")
+
+    if not os.path.exists(file_path):
+        print("❌ questions.json NOT FOUND at:", file_path)
+        return []
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print("❌ JSON LOAD ERROR:", e)
+        return []
+
 
 # =========================
 # DATABASE FUNCTIONS
@@ -105,6 +114,7 @@ def load_results_db():
 
     return results
 
+
 # =========================
 # HOME
 # =========================
@@ -126,6 +136,7 @@ def home():
 
     return render_template("index.html")
 
+
 # =========================
 # QUIZ
 # =========================
@@ -135,6 +146,10 @@ def quiz():
         return redirect(url_for("home"))
 
     questions = load_questions()
+
+    # 🔴 Prevent Render crash if file missing
+    if not questions:
+        return "Questions file missing on server", 500
 
     session.setdefault("correct_count", 0)
     session.setdefault("wrong_count", 0)
@@ -154,6 +169,10 @@ def quiz():
     else:
         q_index = int(request.form["q_index"])
         current_prize = int(request.form["current_prize"])
+
+        # 🔴 Prevent index crash
+        if q_index >= len(questions):
+            return redirect(url_for("leaderboard"))
 
         if "answer" in request.form:
             selected = int(request.form["answer"])
@@ -198,7 +217,7 @@ def quiz():
                     answers
                 )
 
-                # ⭐ store correct user's latest attempt id
+                # ⭐ correct user attempt id
                 session["last_attempt_id"] = result_id
 
                 total = len(questions)
@@ -227,6 +246,7 @@ def quiz():
         show_next=show_next
     )
 
+
 # =========================
 # LEADERBOARD
 # =========================
@@ -239,6 +259,7 @@ def leaderboard():
         results=results,
         last_attempt_id=session.get("last_attempt_id")
     )
+
 
 # =========================
 # REVIEW
@@ -273,12 +294,14 @@ def review(result_id):
 
     return render_template("review.html", attempt=attempt)
 
+
 # =========================
 # API
 # =========================
 @app.route("/api/results")
 def api_results():
     return jsonify(load_results_db())
+
 
 # =========================
 # RUN
