@@ -84,7 +84,8 @@
       <button class="leaderboard">🏆 View Leaderboard</button>
     </a>
 
-    <a href="{{ url_for('review', idx=session['last_attempt_idx']) }}">
+    <a href="{{ url_for('review', result_id=session['last_attempt_id']) }}">
+
       <button class="leaderboard">📋Review My Answers</button>
     </a>
 

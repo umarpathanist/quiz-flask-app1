@@ -22,7 +22,6 @@ DB_CONFIG = {
 # =========================
 def get_conn():
     db_url = os.getenv("DATABASE_URL")
-
     if db_url:
         return psycopg2.connect(db_url)
 
@@ -53,6 +52,7 @@ def save_result_db(name, amount, status, correct, wrong, answers):
     cur.execute("""
         INSERT INTO results (name, amount, status, correct, wrong, answers)
         VALUES (%s, %s, %s, %s, %s, %s)
+        RETURNING id
     """, (
         name,
         amount,
@@ -62,9 +62,13 @@ def save_result_db(name, amount, status, correct, wrong, answers):
         json.dumps(answers)
     ))
 
+    result_id = cur.fetchone()[0]
+
     conn.commit()
     cur.close()
     conn.close()
+
+    return result_id
 
 
 def load_results_db():
@@ -132,7 +136,7 @@ def quiz():
 
     feedback = None
     show_next = False
-    correct_option_text = None  # ⭐ FIX
+    correct_option_text = None
 
     if request.method == "GET":
         q_index = 0
@@ -156,7 +160,7 @@ def quiz():
                 session["correct_count"] += 1
             else:
                 feedback = "wrong"
-                correct_option_text = question["options"][correct - 1]  # ⭐ FIX
+                correct_option_text = question["options"][correct - 1]
                 current_prize -= 250
                 session["wrong_count"] += 1
 
@@ -179,7 +183,7 @@ def quiz():
                 wrong = session["wrong_count"]
                 answers = session["answer_log"]
 
-                save_result_db(
+                result_id = save_result_db(
                     name,
                     current_prize,
                     "finished",
@@ -188,8 +192,8 @@ def quiz():
                     answers
                 )
 
-                results = load_results_db()
-                session["last_attempt_idx"] = results[-1]["id"]  # ⭐ FIX
+                # ⭐ store correct user's latest attempt id
+                session["last_attempt_id"] = result_id
 
                 total = len(questions)
                 percent = (correct / total) * 100
@@ -213,7 +217,7 @@ def quiz():
         question_text=question["question"],
         options=question["options"],
         feedback=feedback,
-        correct_option=correct_option_text,  # ⭐ FIX
+        correct_option=correct_option_text,
         show_next=show_next
     )
 
@@ -227,12 +231,11 @@ def leaderboard():
     return render_template(
         "leaderboard.html",
         results=results,
-        user=session.get("student_name"),
-        last_attempt_idx=session.get("last_attempt_idx")
+        last_attempt_id=session.get("last_attempt_id")
     )
 
 # =========================
-# REVIEW (CORRECT USER)
+# REVIEW
 # =========================
 @app.route("/review/<int:result_id>")
 def review(result_id):

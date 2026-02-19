@@ -20,14 +20,14 @@
       background: white;
       padding: 30px;
       border-radius: 18px;
-      max-width: 800px;
+      max-width: 700px;
       width: 100%;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
 
     table {
@@ -43,7 +43,6 @@
     th {
       background: #667eea;
       color: white;
-      font-weight: 600;
     }
 
     tr:nth-child(even) {
@@ -52,11 +51,11 @@
 
     .highlight {
       background: #d4edda !important;
-      font-weight: 600;
+      font-weight: bold;
     }
 
     .btn {
-      padding: 8px 14px;
+      padding: 8px 16px;
       border: none;
       border-radius: 8px;
       font-weight: 600;
@@ -64,7 +63,6 @@
       background: #667eea;
       color: white;
       text-decoration: none;
-      display: inline-block;
     }
 
     .btn:hover {
@@ -72,20 +70,8 @@
     }
 
     .back {
-      margin-top: 25px;
+      margin-top: 20px;
       text-align: center;
-    }
-
-    @media (max-width: 600px) {
-      th, td {
-        padding: 10px 6px;
-        font-size: 14px;
-      }
-
-      .btn {
-        padding: 6px 10px;
-        font-size: 13px;
-      }
     }
   </style>
 </head>
@@ -96,34 +82,29 @@
   <h1>🏆 Leaderboard</h1>
 
   <table>
-    <thead>
-      <tr>
-        <th>Rank</th>
-        <th>Name</th>
-        <th>Score</th>
-        <th>Action</th>
-      </tr>
-    </thead>
+    <tr>
+      <th>Rank</th>
+      <th>Name</th>
+      <th>Score</th>
+      <th>Action</th>
+    </tr>
 
-    <tbody>
-      {% for r in results %}
-      <tr class="{% if r.name == user %}highlight{% endif %}">
-        <td>{{ loop.index }}</td>
-        <td>{{ r.name }}</td>
-        <td>₹ {{ r.amount }}</td>
-
-        <td>
-          {% if r.name == user %}
-            <a class="btn" href="{{ url_for('review', result_id=r.id) }}">
-              📋 Review My Answers
-            </a>
-          {% else %}
-            —
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
+    {% for r in results %}
+    <tr class="{% if r.id == last_attempt_id %}highlight{% endif %}">
+      <td>{{ loop.index }}</td>
+      <td>{{ r.name }}</td>
+      <td>₹ {{ r.amount }}</td>
+      <td>
+        {% if r.id == last_attempt_id %}
+          <a class="btn" href="{{ url_for('review', result_id=r.id) }}">
+            📋 Review My Answers
+          </a>
+        {% else %}
+          —
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
   </table>
 
   <div class="back">
