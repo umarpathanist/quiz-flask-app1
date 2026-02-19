@@ -22,16 +22,22 @@ DB_CONFIG = {
 # =========================
 def get_conn():
     db_url = os.getenv("DATABASE_URL")
-    if db_url:
-        return psycopg2.connect(db_url)
 
-    return psycopg2.connect(
-        host=DB_CONFIG["host"],
-        database=DB_CONFIG["database"],
-        user=DB_CONFIG["user"],
-        password=DB_CONFIG["password"],
-        port=DB_CONFIG["port"]
-    )
+    try:
+        if db_url:
+            return psycopg2.connect(db_url)
+
+        return psycopg2.connect(
+            host=DB_CONFIG["host"],
+            database=DB_CONFIG["database"],
+            user=DB_CONFIG["user"],
+            password=DB_CONFIG["password"],
+            port=DB_CONFIG["port"]
+        )
+    except Exception as e:
+        print("DB CONNECTION ERROR:", e)
+        raise
+
 
 # =========================
 # LOAD QUESTIONS
