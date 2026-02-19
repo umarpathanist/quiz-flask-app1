@@ -17,7 +17,6 @@ DB_CONFIG = {
     "port": 5432
 }
 
-
 # =========================
 # DATABASE CONNECTION
 # =========================
@@ -25,10 +24,8 @@ def get_conn():
     db_url = os.getenv("DATABASE_URL")
 
     if db_url:
-        # Render / Production DB
         return psycopg2.connect(db_url)
 
-    # Local DB fallback
     return psycopg2.connect(
         host=DB_CONFIG["host"],
         database=DB_CONFIG["database"],
@@ -37,17 +34,14 @@ def get_conn():
         port=DB_CONFIG["port"]
     )
 
-
 # =========================
 # LOAD QUESTIONS
 # =========================
 QUESTIONS_FILE = os.path.join(app.root_path, "questions.json")
 
-
 def load_questions():
     with open(QUESTIONS_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
-
 
 # =========================
 # DATABASE FUNCTIONS
@@ -101,7 +95,6 @@ def load_results_db():
 
     return results
 
-
 # =========================
 # HOME
 # =========================
@@ -123,7 +116,6 @@ def home():
 
     return render_template("index.html")
 
-
 # =========================
 # QUIZ
 # =========================
@@ -140,6 +132,7 @@ def quiz():
 
     feedback = None
     show_next = False
+    correct_option_text = None  # ⭐ FIX
 
     if request.method == "GET":
         q_index = 0
@@ -163,6 +156,7 @@ def quiz():
                 session["correct_count"] += 1
             else:
                 feedback = "wrong"
+                correct_option_text = question["options"][correct - 1]  # ⭐ FIX
                 current_prize -= 250
                 session["wrong_count"] += 1
 
@@ -195,7 +189,7 @@ def quiz():
                 )
 
                 results = load_results_db()
-                session["last_attempt_idx"] = len(results) - 1
+                session["last_attempt_idx"] = results[-1]["id"]  # ⭐ FIX
 
                 total = len(questions)
                 percent = (correct / total) * 100
@@ -219,9 +213,9 @@ def quiz():
         question_text=question["question"],
         options=question["options"],
         feedback=feedback,
+        correct_option=correct_option_text,  # ⭐ FIX
         show_next=show_next
     )
-
 
 # =========================
 # LEADERBOARD
@@ -237,24 +231,38 @@ def leaderboard():
         last_attempt_idx=session.get("last_attempt_idx")
     )
 
-
 # =========================
-# REVIEW
+# REVIEW (CORRECT USER)
 # =========================
-@app.route("/review/<int:idx>")
-def review(idx):
-    results = load_results_db()
+@app.route("/review/<int:result_id>")
+def review(result_id):
+    conn = get_conn()
+    cur = conn.cursor()
 
-    if idx < 0 or idx >= len(results):
+    cur.execute("""
+        SELECT id, name, amount, status, correct, wrong, answers
+        FROM results
+        WHERE id = %s
+    """, (result_id,))
+
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not row:
         return redirect(url_for("leaderboard"))
 
-    attempt = results[idx]
+    attempt = {
+        "id": row[0],
+        "name": row[1],
+        "amount": row[2],
+        "status": row[3],
+        "correct": row[4],
+        "wrong": row[5],
+        "answers": row[6]
+    }
 
-    return render_template(
-        "review.html",
-        attempt=attempt
-    )
-
+    return render_template("review.html", attempt=attempt)
 
 # =========================
 # API
@@ -262,7 +270,6 @@ def review(idx):
 @app.route("/api/results")
 def api_results():
     return jsonify(load_results_db())
-
 
 # =========================
 # RUN
