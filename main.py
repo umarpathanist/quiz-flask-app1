@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.secret_key = "super-secret-key"
 
 # =========================
-# DATABASE CONFIG
+# DATABASE CONFIG (LOCAL)
 # =========================
 DB_CONFIG = {
     "host": "127.0.0.1",
@@ -18,25 +18,24 @@ DB_CONFIG = {
 }
 
 
-import os
-import psycopg2
-
+# =========================
+# DATABASE CONNECTION
+# =========================
 def get_conn():
     db_url = os.getenv("DATABASE_URL")
-    
-    if db_url:
-        # Render / production
-        return psycopg2.connect(db_url)
-    else:
-        # Local fallback
-        return psycopg2.connect(
-            host="127.0.0.1",
-            database="quizdb",
-            user="postgres",
-            password="Umar123",
-            port=5432
-        )
 
+    if db_url:
+        # Render / Production DB
+        return psycopg2.connect(db_url)
+
+    # Local DB fallback
+    return psycopg2.connect(
+        host=DB_CONFIG["host"],
+        database=DB_CONFIG["database"],
+        user=DB_CONFIG["user"],
+        password=DB_CONFIG["password"],
+        port=DB_CONFIG["port"]
+    )
 
 
 # =========================
@@ -135,7 +134,6 @@ def quiz():
 
     questions = load_questions()
 
-    # init session values
     session.setdefault("correct_count", 0)
     session.setdefault("wrong_count", 0)
     session.setdefault("answer_log", [])
@@ -154,7 +152,6 @@ def quiz():
         q_index = int(request.form["q_index"])
         current_prize = int(request.form["current_prize"])
 
-        # answer submitted
         if "answer" in request.form:
             selected = int(request.form["answer"])
             question = questions[q_index]
@@ -179,7 +176,6 @@ def quiz():
 
             show_next = True
 
-        # next button
         else:
             q_index += 1
 
