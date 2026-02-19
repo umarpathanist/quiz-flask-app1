@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: quiz-flask-app
+    env: python
+    startCommand: gunicorn main:app
+    
